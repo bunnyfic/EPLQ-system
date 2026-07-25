@@ -43,6 +43,8 @@ backend/keys/*.pem
 
 # Uploads
 backend/uploads/profile_pictures/
+backend/uploads/profile_pictures/*
+!backend/uploads/profile_pictures/.gitkeep
 
 # Frontend
 frontend/node_modules/
