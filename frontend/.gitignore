@@ -31,6 +31,7 @@ backend/venv/
 
 # Environment files
 backend/.env
+**/venv/
 frontend/.env
 
 # Database
