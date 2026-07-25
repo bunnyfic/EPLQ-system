@@ -1,0 +1,37 @@
+venv/
+.env
+eplq.db
+__pycache__/
+backend/keys/private.pem
+
+# Python
+**/__pycache__/
+**/*.pyc
+
+# Virtual environments
+backend/venv/
+
+# Environment files
+backend/.env
+frontend/.env
+
+# Database
+*.db
+
+# RSA keys
+backend/keys/*.pem
+!backend/keys/.gitkeep
+
+# Uploads
+backend/uploads/profile_pictures/
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+
+# VS Code
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
