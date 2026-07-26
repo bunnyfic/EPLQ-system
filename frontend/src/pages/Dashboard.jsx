@@ -7,7 +7,8 @@ import MenuSystem from "../components/MenuSystem";
 import { searchLocations } from "../services/api";
 import { decryptValue } from "../services/crypto";
 
-const API_ORIGIN = "http://127.0.0.1:8000";
+
+const API_ORIGIN = import.meta.env.VITE_API_URL?.replace("/api", "") || "http://127.0.0.1:8000";
 
 export default function Dashboard() {
   const [results, setResults] = useState([]);
