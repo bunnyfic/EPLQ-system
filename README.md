@@ -249,11 +249,15 @@ MAIL_PASSWORD=
 
 | Login | Dashboard |
 |--------|-----------|
-| Add Screenshot | Add Screenshot |
+|<img width="1364" height="605" alt="image" src="https://github.com/user-attachments/assets/2198e706-05b3-48cc-b81a-63b70b8ef93e" />
+ |<img width="1366" height="599" alt="image" src="https://github.com/user-attachments/assets/804aee0d-b613-4c4d-9f82-1229a6b7e863" />
+|
 
 | Map | Profile |
 |-----|----------|
-| Add Screenshot | Add Screenshot |
+|<img width="720" height="493" alt="image" src="https://github.com/user-attachments/assets/ead298e8-31b0-4454-978a-a3d257e3a5cc" />
+ |<img width="1359" height="609" alt="image" src="https://github.com/user-attachments/assets/53a8cbae-3164-450a-aa33-905bfb043fdd" />
+ |
 
 ---
 
