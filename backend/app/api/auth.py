@@ -80,10 +80,10 @@ def signup(payload: SignupRequest, db: Session = Depends(get_db)):
     db.refresh(new_user)
 
     try:
-    activation_link = f"{os.getenv('FRONTEND_URL')}/activate?token={token}"
-    send_activation_email(new_user.email, activation_link)
-except Exception as e:
-    print(f"[Auth] Failed to send activation email: {e}")
+        activation_link = f"{os.getenv('FRONTEND_URL')}/activate?token={token}"
+        send_activation_email(new_user.email, activation_link)
+    except Exception as e:
+        print(f"[Auth] Failed to send activation email: {e}")
 
 
 # --- Activate Account ---
