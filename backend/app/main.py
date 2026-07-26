@@ -19,6 +19,7 @@ app = FastAPI(title="EPLQ API")
 origins = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
+    "https://your-actual-vercel-url.vercel.app",  # replace with your real URL
 ]
 
 app.add_middleware(
