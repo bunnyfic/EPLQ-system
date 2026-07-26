@@ -13,7 +13,10 @@ let privateKeyPromise = null;
 
 function getPrivateKey() {
   if (!privateKeyPromise) {
-    privateKeyPromise = fetch("http://127.0.0.1:8000/api/keys/private-demo")
+   const API_BASE = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000/api";
+
+// inside getPrivateKey():
+privateKeyPromise = fetch(`${API_BASE}/keys/private-demo`)
       .then((r) => r.text())
       .then((pem) =>
         crypto.subtle.importKey(
