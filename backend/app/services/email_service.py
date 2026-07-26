@@ -1,21 +1,31 @@
 import os
+import logging
 import resend
 from dotenv import load_dotenv
 
 load_dotenv()
 
+logger = logging.getLogger("email_service")
+
 resend.api_key = os.getenv("RESEND_API_KEY")
 
-FROM_EMAIL = "EPLQ <onboarding@resend.dev>"  # swap once you verify your own domain
+# Swap this env var once your domain is verified on resend.com/domains,
+# e.g. RESEND_FROM_EMAIL="EPLQ <noreply@yourdomain.com>"
+FROM_EMAIL = os.getenv("RESEND_FROM_EMAIL", "EPLQ <onboarding@resend.dev>")
 
 
 def _send_email(to_email: str, subject: str, html_body: str):
-    resend.Emails.send({
-        "from": FROM_EMAIL,
-        "to": [to_email],
-        "subject": subject,
-        "html": html_body,
-    })
+    try:
+        resend.Emails.send({
+            "from": FROM_EMAIL,
+            "to": [to_email],
+            "subject": subject,
+            "html": html_body,
+        })
+    except Exception:
+        # Don't let a Resend failure (e.g. sandbox restriction, bad domain)
+        # blow up as an unhandled exception in a background task.
+        logger.exception("Failed to send email to %s", to_email)
 
 
 def send_reset_email(to_email: str, reset_link: str):
