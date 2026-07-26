@@ -9,14 +9,13 @@ function pemToArrayBuffer(pem) {
   return bytes.buffer;
 }
 
+const API_BASE = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000/api";
+
 let privateKeyPromise = null;
 
 function getPrivateKey() {
   if (!privateKeyPromise) {
-   const API_BASE = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000/api";
-
-// inside getPrivateKey():
-privateKeyPromise = fetch(`${API_BASE}/keys/private-demo`)
+    privateKeyPromise = fetch(`${API_BASE}/keys/private-demo`)
       .then((r) => r.text())
       .then((pem) =>
         crypto.subtle.importKey(
