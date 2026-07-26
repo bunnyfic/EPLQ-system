@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel, EmailStr
 import os
 from app.services.email_service import send_reset_email, send_activation_email
+from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
 
 from app.database.db import get_db
 from app.database.models import User
@@ -58,7 +59,7 @@ class MessageResponse(BaseModel):
 # Account is created inactive. An activation link is emailed, and the
 # account only becomes usable once that link is clicked (see /activate).
 @router.post("/signup", response_model=MessageResponse)
-def signup(payload: SignupRequest, db: Session = Depends(get_db)):
+def signup(payload: SignupRequest, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
     existing_user = db.query(User).filter(User.email == payload.email).first()
     if existing_user:
         raise HTTPException(
@@ -79,12 +80,12 @@ def signup(payload: SignupRequest, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_user)
 
-    try:
-        activation_link = f"{os.getenv('FRONTEND_URL')}/activate?token={token}"
-        send_activation_email(new_user.email, activation_link)
-    except Exception as e:
-        print(f"[Auth] Failed to send activation email: {e}")
+    activation_link = f"{os.getenv('FRONTEND_URL')}/activate?token={token}"
+    background_tasks.add_task(send_activation_email, new_user.email, activation_link)
 
+    return MessageResponse(
+        message="Account created. Check your email to activate your account before logging in."
+    )
 
 # --- Activate Account ---
 @router.post("/activate", response_model=MessageResponse)
@@ -128,11 +129,9 @@ def login(payload: LoginRequest, db: Session = Depends(get_db)):
 
 # --- Forgot Password ---
 @router.post("/forgot-password", response_model=MessageResponse)
-def forgot_password(payload: ForgotPasswordRequest, db: Session = Depends(get_db)):
+def forgot_password(payload: ForgotPasswordRequest, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == payload.email).first()
 
-    # Always return the same message, whether or not the email exists.
-    # This prevents leaking which emails are registered.
     generic_message = "If an account with that email exists, a reset link has been sent."
 
     if not user:
@@ -144,7 +143,7 @@ def forgot_password(payload: ForgotPasswordRequest, db: Session = Depends(get_db
     db.commit()
 
     reset_link = f"{os.getenv('FRONTEND_URL')}/reset-password?token={token}"
-    send_reset_email(user.email, reset_link)
+    background_tasks.add_task(send_reset_email, user.email, reset_link)
 
     return MessageResponse(message=generic_message)
 
