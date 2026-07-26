@@ -19,7 +19,7 @@ app = FastAPI(title="EPLQ API")
 origins = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
-    "https://eplq-system-eta.vercel.app/",
+    "https://eplq-system-eta.vercel.app",
 ]
 app.add_middleware(
     CORSMiddleware,
