@@ -1,51 +1,25 @@
 import os
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+import resend
 from dotenv import load_dotenv
 
 load_dotenv()
 
-GMAIL_ADDRESS = os.getenv("GMAIL_ADDRESS")
-GMAIL_APP_PASSWORD = os.getenv("GMAIL_APP_PASSWORD")
-def _send_email(to_email: str, subject: str, html_body: str):
-    print(f"[Email] Attempting to send to {to_email} from {GMAIL_ADDRESS}")
-    
-    if not GMAIL_ADDRESS or not GMAIL_APP_PASSWORD:
-        print("[Email] ERROR: GMAIL_ADDRESS or GMAIL_APP_PASSWORD is missing!")
-        return
+resend.api_key = os.getenv("RESEND_API_KEY")
 
-    msg = MIMEMultipart("alternative")
-    msg["Subject"] = subject
-    msg["From"] = GMAIL_ADDRESS
-    msg["To"] = to_email
-    msg.attach(MIMEText(html_body, "html"))
+FROM_EMAIL = "EPLQ <onboarding@resend.dev>"  # swap once you verify your own domain
 
-    try:
-        with smtplib.SMTP("smtp.gmail.com", 587) as server:
-            server.starttls()
-            server.login(GMAIL_ADDRESS, GMAIL_APP_PASSWORD)
-            server.sendmail(GMAIL_ADDRESS, to_email, msg.as_string())
-        print(f"[Email] Successfully sent to {to_email}")
-    except Exception as e:
-        print(f"[Email] FAILED to send: {type(e).__name__}: {e}")
 
 def _send_email(to_email: str, subject: str, html_body: str):
-    msg = MIMEMultipart("alternative")
-    msg["Subject"] = subject
-    msg["From"] = GMAIL_ADDRESS
-    msg["To"] = to_email
-    msg.attach(MIMEText(html_body, "html"))
-
-    with smtplib.SMTP("smtp.gmail.com", 587) as server:
-        server.starttls()
-        server.login(GMAIL_ADDRESS, GMAIL_APP_PASSWORD)
-        server.sendmail(GMAIL_ADDRESS, to_email, msg.as_string())
+    resend.Emails.send({
+        "from": FROM_EMAIL,
+        "to": [to_email],
+        "subject": subject,
+        "html": html_body,
+    })
 
 
 def send_reset_email(to_email: str, reset_link: str):
     subject = "Reset Your Password — EPLQ"
-
     html_body = f"""
     <html>
       <body style="margin:0; padding:0; background-color:#1a1519; font-family: Georgia, 'Times New Roman', serif;">
@@ -98,13 +72,11 @@ def send_reset_email(to_email: str, reset_link: str):
       </body>
     </html>
     """
-
     _send_email(to_email, subject, html_body)
 
 
 def send_activation_email(to_email: str, activation_link: str):
     subject = "Activate Your Account — EPLQ"
-
     html_body = f"""
     <html>
       <body style="margin:0; padding:0; background-color:#1a1519; font-family: Georgia, 'Times New Roman', serif;">
@@ -157,5 +129,4 @@ def send_activation_email(to_email: str, activation_link: str):
       </body>
     </html>
     """
-
     _send_email(to_email, subject, html_body)
