@@ -44,6 +44,6 @@ def root():
 
 @app.get("/api/keys/private-demo", response_class=PlainTextResponse)
 def get_demo_private_key() -> str:
-    # DEMO ONLY — in a real system the private key never leaves the user's device.
-    with open("keys/private.pem") as f:
+    path = "private.pem" if os.path.exists("private.pem") else "keys/private.pem"
+    with open(path) as f:
         return f.read()
