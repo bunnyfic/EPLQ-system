@@ -8,7 +8,27 @@ load_dotenv()
 
 GMAIL_ADDRESS = os.getenv("GMAIL_ADDRESS")
 GMAIL_APP_PASSWORD = os.getenv("GMAIL_APP_PASSWORD")
+def _send_email(to_email: str, subject: str, html_body: str):
+    print(f"[Email] Attempting to send to {to_email} from {GMAIL_ADDRESS}")
+    
+    if not GMAIL_ADDRESS or not GMAIL_APP_PASSWORD:
+        print("[Email] ERROR: GMAIL_ADDRESS or GMAIL_APP_PASSWORD is missing!")
+        return
 
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = subject
+    msg["From"] = GMAIL_ADDRESS
+    msg["To"] = to_email
+    msg.attach(MIMEText(html_body, "html"))
+
+    try:
+        with smtplib.SMTP("smtp.gmail.com", 587) as server:
+            server.starttls()
+            server.login(GMAIL_ADDRESS, GMAIL_APP_PASSWORD)
+            server.sendmail(GMAIL_ADDRESS, to_email, msg.as_string())
+        print(f"[Email] Successfully sent to {to_email}")
+    except Exception as e:
+        print(f"[Email] FAILED to send: {type(e).__name__}: {e}")
 
 def _send_email(to_email: str, subject: str, html_body: str):
     msg = MIMEMultipart("alternative")
