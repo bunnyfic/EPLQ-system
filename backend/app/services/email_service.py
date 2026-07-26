@@ -1,35 +1,39 @@
 import os
 import logging
-import resend
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 from dotenv import load_dotenv
 
 load_dotenv()
 
 logger = logging.getLogger("email_service")
 
-resend.api_key = os.getenv("RESEND_API_KEY")
-
-# Swap this env var once your domain is verified on resend.com/domains,
-# e.g. RESEND_FROM_EMAIL="EPLQ <noreply@yourdomain.com>"
-FROM_EMAIL = os.getenv("RESEND_FROM_EMAIL", "EPLQ <onboarding@resend.dev>")
+GMAIL_ADDRESS = os.getenv("GMAIL_ADDRESS")
+GMAIL_APP_PASSWORD = os.getenv("GMAIL_APP_PASSWORD")
 
 
 def _send_email(to_email: str, subject: str, html_body: str):
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = subject
+    msg["From"] = GMAIL_ADDRESS
+    msg["To"] = to_email
+    msg.attach(MIMEText(html_body, "html"))
+
     try:
-        resend.Emails.send({
-            "from": FROM_EMAIL,
-            "to": [to_email],
-            "subject": subject,
-            "html": html_body,
-        })
+        with smtplib.SMTP("smtp.gmail.com", 587) as server:
+            server.starttls()
+            server.login(GMAIL_ADDRESS, GMAIL_APP_PASSWORD)
+            server.sendmail(GMAIL_ADDRESS, to_email, msg.as_string())
     except Exception:
-        # Don't let a Resend failure (e.g. sandbox restriction, bad domain)
-        # blow up as an unhandled exception in a background task.
+        # Don't let an SMTP failure blow up as an unhandled exception
+        # in a background task — log it and move on.
         logger.exception("Failed to send email to %s", to_email)
 
 
 def send_reset_email(to_email: str, reset_link: str):
     subject = "Reset Your Password — EPLQ"
+
     html_body = f"""
     <html>
       <body style="margin:0; padding:0; background-color:#1a1519; font-family: Georgia, 'Times New Roman', serif;">
@@ -82,11 +86,13 @@ def send_reset_email(to_email: str, reset_link: str):
       </body>
     </html>
     """
+
     _send_email(to_email, subject, html_body)
 
 
 def send_activation_email(to_email: str, activation_link: str):
     subject = "Activate Your Account — EPLQ"
+
     html_body = f"""
     <html>
       <body style="margin:0; padding:0; background-color:#1a1519; font-family: Georgia, 'Times New Roman', serif;">
@@ -139,4 +145,5 @@ def send_activation_email(to_email: str, activation_link: str):
       </body>
     </html>
     """
+
     _send_email(to_email, subject, html_body)
