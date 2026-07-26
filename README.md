@@ -1,6 +1,8 @@
 # 🔐 EPLQ System
 ### Efficient Privacy-Preserving Location-Based Query System
 
+**live demo :** https://eplq-system-eta.vercel.app/
+
 <p align="center">
 
 ![Python](https://img.shields.io/badge/Python-3.13-blue?style=for-the-badge&logo=python)
