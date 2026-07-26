@@ -3,8 +3,7 @@ import { useNavigate } from "react-router-dom";
 import bgImage from "../assets/signup-bg.png";
 import { getProfile, saveProfile } from "../services/api";
 
-const API_ORIGIN = "http://127.0.0.1:8000";
-
+const API_ORIGIN = import.meta.env.VITE_API_URL?.replace("/api", "") || "http://127.0.0.1:8000";
 export default function CompleteProfile() {
   const [email, setEmail] = useState("");
   const [firstName, setFirstName] = useState("");
