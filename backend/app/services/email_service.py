@@ -1,32 +1,37 @@
 import os
 import logging
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+import requests
 from dotenv import load_dotenv
 
 load_dotenv()
 
 logger = logging.getLogger("email_service")
 
-GMAIL_ADDRESS = os.getenv("GMAIL_ADDRESS")
-GMAIL_APP_PASSWORD = os.getenv("GMAIL_APP_PASSWORD")
+BREVO_API_KEY = os.getenv("BREVO_API_KEY")
+FROM_EMAIL = os.getenv("BREVO_FROM_EMAIL", "eplq.noreply@gmail.com")
+FROM_NAME = "EPLQ"
+
+BREVO_ENDPOINT = "https://api.brevo.com/v3/smtp/email"
 
 
 def _send_email(to_email: str, subject: str, html_body: str):
-    msg = MIMEMultipart("alternative")
-    msg["Subject"] = subject
-    msg["From"] = GMAIL_ADDRESS
-    msg["To"] = to_email
-    msg.attach(MIMEText(html_body, "html"))
+    headers = {
+        "accept": "application/json",
+        "api-key": BREVO_API_KEY,
+        "content-type": "application/json",
+    }
+    payload = {
+        "sender": {"name": FROM_NAME, "email": FROM_EMAIL},
+        "to": [{"email": to_email}],
+        "subject": subject,
+        "htmlContent": html_body,
+    }
 
     try:
-        with smtplib.SMTP("smtp.gmail.com", 587) as server:
-            server.starttls()
-            server.login(GMAIL_ADDRESS, GMAIL_APP_PASSWORD)
-            server.sendmail(GMAIL_ADDRESS, to_email, msg.as_string())
+        response = requests.post(BREVO_ENDPOINT, json=payload, headers=headers, timeout=10)
+        response.raise_for_status()
     except Exception:
-        # Don't let an SMTP failure blow up as an unhandled exception
+        # Don't let a Brevo failure blow up as an unhandled exception
         # in a background task — log it and move on.
         logger.exception("Failed to send email to %s", to_email)
 
